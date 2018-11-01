@@ -20,17 +20,13 @@ const options = {
             'https'
         ],
         basePath: '/',
-        tags: [{
-            name: 'Posts',
-            description: 'Get details of posts'
-        },
+        tags: [
         {
             name: 'Users',
             description: 'Users API Service with static response.'
         }],
     },
     apis: [
-        'routes/index.js',
         'routes/users.js'
     ],
 };

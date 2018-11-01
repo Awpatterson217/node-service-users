@@ -50,7 +50,7 @@ router.get('/users', (req, res) => {
  *     summary: Get details of a user
  *     description: Returns details of a single user
  *     tags:
- *       - users
+ *       - Users
  *     produces:
  *       - application/json
  *     parameters:
@@ -58,8 +58,8 @@ router.get('/users', (req, res) => {
  *         description: uuid of the user to fetch
  *         in: path
  *         required: true
- *         type: integer
- *         example: 565a82da-6584-442d-b30c-66729a9a230f
+ *         type: string
+ *         example: "565a82da-6584-442d-b30c-66729a9a230f"
  *     responses:
  *       200:
  *         description: Successful
