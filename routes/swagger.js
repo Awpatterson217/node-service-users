@@ -27,6 +27,7 @@ const options = {
         }],
     },
     apis: [
+        'routes/index.js',
         'routes/users.js'
     ],
 };

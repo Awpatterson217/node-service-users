@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+
 const user = require('../stuff/user');
 
 const router = express.Router();
@@ -27,16 +28,7 @@ router.get('/users', (req, res) => {
     log('/users hit');
 
     try {
-        const promise = sampleRepo.getAllPosts();
-
-        promise.then(data => {
-            res.status(200).send(data);
-        });
-
-        promise.catch(error => {
-            log('Failed', error);
-            res.status(500).json(sampleError);
-        });
+        user.getAll();
     } catch (e) {
         log('Route /users failed with error', e);
         res.status(500).json(sampleError);
@@ -67,10 +59,16 @@ router.get('/users', (req, res) => {
  *         description: Server Error
  */
 router.get('/users/:userId', (req, res) => {
+    console.log('HEY');
     try {
         const userId = req.params.userId;
+
         log('/users/:userId hit');
+
         log({userId});
+
+        user.get(userId);
+
         // .then(data => {
         //     // Do something (if required) with the data, then send it to the client
         //     res.status(200).send(data);
@@ -105,6 +103,8 @@ router.get('/users/:userId', (req, res) => {
  *         description: Server Error
  */
 router.post('/users', (req, res) => {
+    console.log('HEY');
+
     const { name, email} = req.body;
 
     log('post - /users hit');
@@ -118,7 +118,7 @@ router.post('/users', (req, res) => {
     }
 
     try {
-        const response = user.create();
+        const response = user.create({ email, name });
 
         res.status(200).json(response);
     } catch (e) {
