@@ -10,8 +10,6 @@ const util = require('util');
 const readFile = util.promisify(fs.readFile)
 const writeFile = util.promisify(fs.writeFile)
 
-const { log } = console;
-
 /**
  * Represents a file.
  * @constructor
