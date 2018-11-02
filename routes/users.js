@@ -9,13 +9,13 @@ const {
 } = require('../repositories/common');
 
 const File = require('../repositories/file');
-const Mongo = require('../repositories/file');
+const Mongo = require('../repositories/mongo');
 
 const router = express.Router();
 
 const { log } = console;
 
-const filePath = path.join(process.cwd(), '..', 'data', 'users.json');
+const filePath = path.join(process.cwd(), 'data', 'users.json');
 
 // Not sure what to use instead of sampleError
 const sampleError = {
@@ -25,7 +25,18 @@ const sampleError = {
 };
 
 const usersFile = new File(filePath);
-// const userMongo = new Mongo(db);
+const userMongo = new Mongo();
+
+/**
+ * @swagger
+ * definitions:
+ *   User:
+ *     properties:
+ *       name:
+ *         type: string
+ *       email:
+ *         type: string
+ */
 
 /**
  * @swagger
@@ -34,7 +45,7 @@ const usersFile = new File(filePath);
  *     summary: Get all users
  *     description: Returns the total number of users, the users, and details.
  *     tags:
- *       - Users
+ *       - Users (Modifies data/users.json)
  *     produces:
  *       - application/json
  *     responses:
@@ -43,9 +54,7 @@ const usersFile = new File(filePath);
  *       500:
  *         description: Server Error
  */
-router.get('/users', (req, res) => {
-    log('/users hit (get)');
-
+router.get('/', (req, res) => {
     usersFile.read()
         .then(parseBuffer)
         .then((users) => {
@@ -54,7 +63,7 @@ router.get('/users', (req, res) => {
                 total_count: users.length
             };
 
-            res.status(200).json(JSON.stringify(data));
+            res.status(200).json(data);
         })
         .catch((e) => {
             log('Route /users failed with error', e);
@@ -64,16 +73,16 @@ router.get('/users', (req, res) => {
 
 /**
  * @swagger
- * /users/{userId}:
+ * /users/{id}:
  *   get:
  *     summary: Get details of a user
  *     description: Returns details of a single user
  *     tags:
- *       - Users
+ *       - Users (Modifies data/users.json)
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: userId
+ *       - name: id
  *         description: uuid of the user to fetch
  *         in: path
  *         required: true
@@ -85,10 +94,8 @@ router.get('/users', (req, res) => {
  *       500:
  *         description: Server Error
  */
-router.get('/users/:userId', (req, res) => {
-    log('/users/:userId hit (get)');
-
-    const { userId } = req.params;
+router.get('/:id', (req, res) => {
+    const { id } = req.params;
 
     usersFile.read()
         .then(parseBuffer)
@@ -109,25 +116,30 @@ router.get('/users/:userId', (req, res) => {
  *     summary: Create a new user
  *     description: Creates a new user and provides the user with a randomly generated uuid
  *     tags:
- *       - Users
+ *       - Users (Modifies data/users.json)
+ *     parameters:
+ *       - name: user
+ *         description: User object
+ *         in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/User'
  *     responses:
- *       200:
- *         description: Successful
+ *       201:
+ *         description: Created
  *       500:
  *         description: Server Error
  */
-router.post('/users', (req, res) => {
-    log('/users hit (post)');
+router.post('/', (req, res) => {
+    const { name, email } = req.body;
+
+    // Normally I would check for malicious input here
 
     if (!name || !email) {
         res.status(500).json({
             message: 'Invalid name or email'
         });
     }
-
-    // Normally I would check for malicious input here
-
-    const { name, email} = req.body;
 
     usersFile.read()
         .then(parseBuffer)
@@ -136,6 +148,9 @@ router.post('/users', (req, res) => {
             return JSON.stringify(users);
         })
         .then(users => usersFile.write(users))
+        .then(() => {
+            res.status(201).send('Created');
+        })
         .catch(e => log(`Error: ${e}`));
 });
 

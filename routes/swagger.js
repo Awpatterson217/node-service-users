@@ -19,15 +19,9 @@ const options = {
             'http',
             'https'
         ],
-        basePath: '/',
-        tags: [
-        {
-            name: 'Users',
-            description: 'Users API Service with static response.'
-        }],
+        basePath: '/'
     },
     apis: [
-        'routes/index.js',
         'routes/users.js'
     ],
 };

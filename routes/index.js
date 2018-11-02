@@ -7,7 +7,7 @@ const swaggerRoutes = require('./swagger');
 
 const router = express.Router();
 
-router.use('/docs', swaggerRoutes);
 router.use('/users', usersRoutes);
+router.use('/docs', swaggerRoutes);
 
 module.exports = router;
