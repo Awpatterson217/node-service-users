@@ -5,6 +5,7 @@
   "description": "",
   "scripts": {
     "start": "cross-env NODE_ENV=production node app.js",
+    "mongodb:insert": "node mongoInit.js",
     "test": "",
     "dev": "cross-env NODE_ENV=development node app.js"
   },
