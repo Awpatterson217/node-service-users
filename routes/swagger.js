@@ -22,7 +22,8 @@ const options = {
         basePath: '/'
     },
     apis: [
-        'routes/users.js'
+        'routes/usersFile.js',
+        'routes/usersMongo.js',
     ],
 };
 

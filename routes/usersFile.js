@@ -3,29 +3,25 @@
 const express = require('express');
 const path = require('path');
 
-const {
-    addId,
-    parseBuffer,
-} = require('../repositories/common');
-
-const File = require('../repositories/file');
-const Mongo = require('../repositories/mongo');
-
 const router = express.Router();
 
-const { log } = console;
-
-const filePath = path.join(process.cwd(), 'data', 'users.json');
-
-// Not sure what to use instead of sampleError
 const sampleError = {
     type: 'ErrorType',
     message: 'Error occurred',
     messageCode: 1052 // Optional message code (numeric)
 };
 
+const {
+    addId,
+    parseBuffer,
+} = require('../repositories/common');
+const File = require('../repositories/file');
+
+const { log } = console;
+
+const filePath = path.join(process.cwd(), 'data', 'users.json');
+
 const usersFile = new File(filePath);
-const userMongo = new Mongo();
 
 /**
  * @swagger
@@ -45,7 +41,7 @@ const userMongo = new Mongo();
  *     summary: Get all users
  *     description: Returns the total number of users, the users, and details.
  *     tags:
- *       - Users (Modifies data/users.json)
+ *       - Users (users.json)
  *     produces:
  *       - application/json
  *     responses:
@@ -73,17 +69,17 @@ router.get('/', (req, res) => {
 
 /**
  * @swagger
- * /users/{id}:
+ * /users/{uuid}:
  *   get:
  *     summary: Get details of a user
  *     description: Returns details of a single user
  *     tags:
- *       - Users (Modifies data/users.json)
+ *       - Users (users.json)
  *     produces:
  *       - application/json
  *     parameters:
- *       - name: id
- *         description: uuid of the user to fetch
+ *       - name: uuid
+ *         description: id of the user to fetch
  *         in: path
  *         required: true
  *         type: string
@@ -94,13 +90,13 @@ router.get('/', (req, res) => {
  *       500:
  *         description: Server Error
  */
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
+router.get('/:uuid', (req, res) => {
+    const { uuid } = req.params;
 
     usersFile.read()
         .then(parseBuffer)
         .then((users) => {
-            const user = users.filter(user => user.uuid === id)
+            const user = users.filter(user => user.uuid === uuid)
             res.status(200).json(user);
         })
         .catch((e) => {
@@ -116,7 +112,7 @@ router.get('/:id', (req, res) => {
  *     summary: Create a new user
  *     description: Creates a new user and provides the user with a randomly generated uuid
  *     tags:
- *       - Users (Modifies data/users.json)
+ *       - Users (users.json)
  *     parameters:
  *       - name: user
  *         description: User object

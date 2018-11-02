@@ -22,9 +22,9 @@ const uuid = require('uuid');
  */
 function addId({ email, name }) {
     const user = {
-        email,
+        uuid: uuid.v4(),
         name,
-        uuid: uuid.v4()
+        email
     };
 
     return user;
@@ -43,4 +43,4 @@ function parseBuffer(data) {
 module.exports = {
     addId,
     parseBuffer
-}
+};

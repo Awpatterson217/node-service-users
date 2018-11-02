@@ -7,39 +7,41 @@
 const { log } = console;
 
 /**
- * Represents a MongoDB collection called 'users'.
+ * Represents a MongoDB collection.
  * @constructor
  */
-function Mongo() {
+function MongoDBCollection(collection) {
+    this.collection = collection;
+
     /**
-     * Returns a single user by id.
+     * Returns a single object by id.
      * 
      * @function
-     * @param {string} id
-     * @returns {User}
+     * @param {Object} filter
+     * @returns {Object}
      */
-    this.get = function(id) {
-        log('Mongo.get() called, id: ', id);
+    this.get = function(filter) {
+        log('Mongo.get() called, id: ', filter);
     }
     /**
-     * Returns a list of users from MongoDB collection.
+     * Returns a list of objects.
      * 
      * @function
-     * @returns {User[]}
+     * @returns {Object[]}
      */
     this.getAll = function() {
         log('Mongo.getAll() called');
     }
     /**
-     * Inserts user into MongoDB collection.
+     * Inserts a single object.
      * 
      * @function
-     * @param {User} user
+     * @param {Object} data
      * @returns {Promise} 
      */
-    this.insert = function(user) {
+    this.insert = function(data) {
         log('Mongo.insert() called');
     }
 }
 
-module.exports = Mongo;
+module.exports = MongoDBCollection;
