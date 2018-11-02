@@ -1,12 +1,31 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
 
-const user = require('../stuff/user');
+const {
+    addId,
+    parseBuffer,
+} = require('../repositories/common');
+
+const File = require('../repositories/file');
+const Mongo = require('../repositories/file');
 
 const router = express.Router();
 
 const { log } = console;
+
+const filePath = path.join(process.cwd(), '..', 'data', 'users.json');
+
+// Not sure what to use instead of sampleError
+const sampleError = {
+    type: 'ErrorType',
+    message: 'Error occurred',
+    messageCode: 1052 // Optional message code (numeric)
+};
+
+const usersFile = new File(filePath);
+// const userMongo = new Mongo(db);
 
 /**
  * @swagger
@@ -25,14 +44,22 @@ const { log } = console;
  *         description: Server Error
  */
 router.get('/users', (req, res) => {
-    log('/users hit');
+    log('/users hit (get)');
 
-    try {
-        user.getAll();
-    } catch (e) {
-        log('Route /users failed with error', e);
-        res.status(500).json(sampleError);
-    }
+    usersFile.read()
+        .then(parseBuffer)
+        .then((users) => {
+            const data = {
+                users,
+                total_count: users.length
+            };
+
+            res.status(200).json(JSON.stringify(data));
+        })
+        .catch((e) => {
+            log('Route /users failed with error', e);
+            res.status(500).json(sampleError);
+        });
 });
 
 /**
@@ -59,34 +86,21 @@ router.get('/users', (req, res) => {
  *         description: Server Error
  */
 router.get('/users/:userId', (req, res) => {
-    console.log('HEY');
-    try {
-        const userId = req.params.userId;
+    log('/users/:userId hit (get)');
 
-        log('/users/:userId hit');
+    const { userId } = req.params;
 
-        log({userId});
-
-        user.get(userId);
-
-        // .then(data => {
-        //     // Do something (if required) with the data, then send it to the client
-        //     res.status(200).send(data);
-        // })
-        // .catch(error => {
-        //     // Never send stack traces to the client.
-        //     console.log(`/users/${userId} failed with error, ${error}`);
-        //     res.status(500).json(sampleError);
-        // });
-
-    } catch (e) {
-        // Use a good logging framework for logging to file
-        res.status(500).json(sampleError);
-    }
+    usersFile.read()
+        .then(parseBuffer)
+        .then((users) => {
+            const user = users.filter(user => user.uuid === id)
+            res.status(200).json(user);
+        })
+        .catch((e) => {
+            log('Route /users/:userId failed with error', e);
+            res.status(500).json(sampleError);
+        });
 });
-
-// Was unsure what to put for 'produces' in the
-// Swagger annotation below, so I deleted it...
 
 /**
  * @swagger
@@ -103,32 +117,26 @@ router.get('/users/:userId', (req, res) => {
  *         description: Server Error
  */
 router.post('/users', (req, res) => {
-    console.log('HEY');
+    log('/users hit (post)');
 
-    const { name, email} = req.body;
-
-    log('post - /users hit');
-
-    // Normally I would check for malicious input here
-    
     if (!name || !email) {
         res.status(500).json({
             message: 'Invalid name or email'
         });
     }
 
-    try {
-        const response = user.create({ email, name });
+    // Normally I would check for malicious input here
 
-        res.status(200).json(response);
-    } catch (e) {
-        log('Route /users failed with error', e);
+    const { name, email} = req.body;
 
-        res.status(500)
-            .json({
-                message: 'An error occurred calling user.create()'
-            });
-    }
+    usersFile.read()
+        .then(parseBuffer)
+        .then((users) => {
+            users.unshift(addId({ name, email }))
+            return JSON.stringify(users);
+        })
+        .then(users => usersFile.write(users))
+        .catch(e => log(`Error: ${e}`));
 });
 
 module.exports = router;
