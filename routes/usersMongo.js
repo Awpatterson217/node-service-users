@@ -36,22 +36,19 @@ const { log } = console;
  *         description: Server Error
  */
 router.get('/', (req, res) => {
-    log('get[all]()');
+    usersCollection.getAll((error, users) => {
+        if (error) {
+            log('Route /users failed with error', error);
+            res.status(500).json(sampleError);
+        }
 
-    // usersCollection.getAll()
-    //     .then(parseBuffer)
-    //     .then((users) => {
-    //         const data = {
-    //             users,
-    //             total_count: users.length
-    //         };
+        const data = {
+            users,
+            total_count: users.length
+        };
 
-    //         res.status(200).json(data);
-    //     })
-    //     .catch((e) => {
-    //         log('Route /users failed with error', e);
-    //         res.status(500).json(sampleError);
-    //     });
+        res.status(200).json(data);
+    });
 });
 
 /**
@@ -80,14 +77,14 @@ router.get('/', (req, res) => {
 router.get('/:uuid', (req, res) => {
     const { uuid } = req.params;
 
-    log('get() called with: ', uuid);
+    usersCollection.get({ uuid }, (error, users) => {
+        if (error) {
+            log('Route /users:uuid failed with error', error);
+            res.status(500).json(sampleError);
+        }
 
-    // usersCollection.get({ uuid })
-    //     .then((user) => res.status(200).json(user))
-    //     .catch((e) => {
-    //         log('Route /users/:userId failed with error', e);
-    //         res.status(500).json(sampleError);
-    //     });
+        res.status(200).json(users);
+    });
 });
 
 /**
@@ -114,8 +111,6 @@ router.get('/:uuid', (req, res) => {
 router.post('/', (req, res) => {
     const { name, email } = req.body;
 
-    log('post() called - email: ' + email + ', name: ' + name);
-
     // Normally I would check for malicious input here
 
     if (!name || !email) {
@@ -124,17 +119,18 @@ router.post('/', (req, res) => {
         });
     }
 
-    // usersCollection.read()
-    //     .then(parseBuffer)
-    //     .then((users) => {
-    //         users.unshift(addId({ name, email }))
-    //         return JSON.stringify(users);
-    //     })
-    //     .then(users => usersFile.write(users))
-    //     .then(() => {
-    //         res.status(201).send('Created');
-    //     })
-    //     .catch(e => log(`Error: ${e}`));
+    usersCollection.insert(addId({ name, email }), (error, number) => {
+        if (error) {
+            log('Route /users:uuid failed with error', error);
+            res.status(500).json(sampleError);
+        }
+
+        if (number) {
+            res.status(201).send('Created');
+        } else {
+            res.status(500).json(sampleError);
+        }
+    });
 });
 
 module.exports = router;
